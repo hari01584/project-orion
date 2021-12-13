@@ -10,7 +10,7 @@ arch = machine[4].lower()
 
 ### CONFIGS
 ENDPOINT_GIT = "https://api.github.com/repos/fatedier/frp/releases"
-MATCH_TAGS = ['v0.38.0', ]
+MATCH_TAGS = ['v0.38.0']
 MATCH_TAGS.append(syst)
 MATCH_TAGS.append(arch)
 ### CONFIGS
@@ -26,20 +26,45 @@ print("Parsing API Data...")
 assets_url = []
 for release in data:
     for asset in release['assets']:
-        assets_url.append(asset['browser_download_url'])
+        assets_url.append([asset['browser_download_url'], 0])
 
-multiplexed_url = assets_url[0]
-max_match = 0
 for item in assets_url:
-    match = 0
     for tag in MATCH_TAGS:
-        if tag in item:
-            match += 1
-    if(match > max_match):
-        multiplexed_url = item
-        max_match = match
-        
+        if tag in item[0]:
+            item[1] += 1
+
+assets_url = sorted(assets_url, key=lambda x: x[1], reverse=True)
+multiplexed_url = assets_url[0][0]
+max_match = assets_url[0][1]
+
+def yes_or_no(question):
+    reply = str(input(question+' (y/n): ')).lower().strip()
+    if reply[0] == 'y':
+        return True
+    if reply[0] == 'n':
+        return False
+    else:
+        return yes_or_no("Uhhhh... please enter ")
+
+def get_choice(n):
+    try:
+        val = int(input("Choose an option [0-%d]: "%(n-1, )))
+        if val < 0 or val > n:
+            raise ValueError
+        return val
+    except ValueError:
+        print("Invalid option, Choose again ")
+        return get_choice(n)
+
 print("Matched %s with %d tags..."%(multiplexed_url, max_match))
+if(max_match != len(MATCH_TAGS)):
+    if(yes_or_no("Matching successful but one or more tags are missing, Do you want to select version on your own?")):
+        n = 10
+        for i in range(n):
+            print("[%d] %s"%(i, assets_url[i][0]))
+        index = get_choice(n)
+        multiplexed_url = assets_url[index][0]
+        max_match = assets_url[index][1]
 
 print("Starting asset download")
 def download(url, filename):
@@ -81,4 +106,4 @@ with open('config.ini', 'w') as configfile:
   config.write(configfile)
 
 
-print("You are all set, please run getconfig.py to download cloud based configurations!!")
+print("You are all set, please run getcloud.py to download cloud based configurations!!")
