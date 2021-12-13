@@ -23,6 +23,10 @@ resp = requests.get(url=ENDPOINT_GIT)
 data = resp.json()
 print("Parsing API Data...")
 
+if('message' in data):
+    print(data['message'])
+    exit(0)
+
 assets_url = []
 for release in data:
     for asset in release['assets']:
@@ -104,6 +108,3 @@ config['Jumble']['Key3'] = 'Val3'
 
 with open('config.ini', 'w') as configfile:
   config.write(configfile)
-
-
-print("You are all set, please run getcloud.py to download cloud based configurations!!")
