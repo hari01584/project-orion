@@ -1,3 +1,4 @@
 sirius/config.ini
 frp**/
 sirius/config-sample.ini
+sirius/t_configs/generated_**.ini
