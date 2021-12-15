@@ -101,6 +101,7 @@ import configparser
 config = configparser.ConfigParser()
 config['Common'] = {}
 config['Common']['dir'] = fname.rsplit('.', 1)[0]
+config['Common']['name'] = 'frpc.exe' if os.name == 'nt' else 'frpc'
 config['Jumble'] = {}
 config['Jumble']['Key1'] = 'Val1'
 config['Jumble']['Key2'] = 'Val2'
