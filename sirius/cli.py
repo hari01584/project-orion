@@ -201,6 +201,7 @@ def scrapeConfigs(sport):
     url = 'http://127.0.0.1:'+str(sport)+'/generated_client_connect.ini'
     #while(True): pass
     r = requests.get(url, timeout=4)
+
     if(str(sport) not in str(r.content)):
         log('fatal', 'error, downloaded_client_config corrupt/invalid.')
         exit(-1)
@@ -208,6 +209,13 @@ def scrapeConfigs(sport):
     with open('t_configs/downloaded_client_connect.ini', 'wb') as fd:
         for chunk in r.iter_content(1024):
             fd.write(chunk)
+
+    config = configparser.RawConfigParser()
+    config.read('t_configs/downloaded_client_connect.ini')
+    config.set('common', 'server_addr', SERVER_HOST)
+    config.set('common', 'server_port', SERVER_PORT)
+    with open('t_configs/downloaded_client_connect.ini', 'w') as configfile:
+        config.write(configfile)
 
     return True
 
