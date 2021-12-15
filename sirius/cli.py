@@ -87,7 +87,6 @@ sp.add_parser('status')
 args = parser.parse_args(sys.argv[1:])
 
 IS_DEBUG = args.debug
-
 if(args.host != 'none'):
     log('trace', 'server host provided in args, skipping checks')
     SERVER_HOST = args.host
