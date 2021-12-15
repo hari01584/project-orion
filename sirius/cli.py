@@ -10,6 +10,10 @@ import socket
 import random
 import time
 
+class JustAException(Exception):
+    pass
+
+
 IS_DEBUG = False
 def log(level, message):
     if(IS_DEBUG or level.lower() in ['fatal', 'out', 'check', 'success']):
@@ -53,7 +57,7 @@ def resolveHostname(host):
     if extrac:
         ipv = extrac.group(1)
     else:
-        raise subprocess.CalledProcessError
+        raise JustAException()
 
     log('trace', 'ip resolved address is %s'%(ipv,))
     log('trace', 'packet data: %s'%(proc,))
@@ -65,7 +69,7 @@ def c_verify_server_ping():
     log("trace", "verifying valid server connection")
     try:
         SERVER_HOST = resolveHostname(SERVER_HOST) # TODO: MAYBE NOT GOOD
-    except subprocess.CalledProcessError as e:
+    except (subprocess.CalledProcessError, JustAException) as e:
         log('fatal', "Host server offline or unavaliable. Try switching wifi channel using windows app NetSetMan or linux command nmcli")
         exit(-1)
 
