@@ -15,7 +15,7 @@ def log(level, message):
     if(IS_DEBUG or level.lower() in ['fatal', 'out', 'check', 'success']):
         print('[%s] %s'%(level, message))
 
-config = configparser.ConfigParser()
+config = configparser.RawConfigParser()
 config.read('server.ini')
 
 try:
@@ -26,7 +26,7 @@ except Exception:
     log("fatal", "server.ini corrupt or not found.")
     exit(-1)
 
-config = configparser.ConfigParser()
+config = configparser.RawConfigParser()
 config.read('config.ini')
 try:
     FRPC_FOLDER = config['Common']['dir']
@@ -44,13 +44,7 @@ def find_between(s, first, last):
         return ""
 
 def resolveHostname(host):
-    """
-    Returns True if host (str) responds to a ping request.
-    Remember that a host may not respond to a ping (ICMP) request even if the host name is valid.
-    """
-    # Option for the number of packets as a function of
     param = '-n' if platform.system().lower()=='windows' else '-c'
-    # Building the command. Ex: "ping -c 1 google.com"
     command = ['ping', param, '1', host]
     proc = subprocess.check_output(command)
 
@@ -76,7 +70,8 @@ def c_verify_server_ping():
 
 parser = argparse.ArgumentParser(prog='cli.py')
 parser.add_argument('--debug', action='store_true')
-parser.add_argument('-s', '--host', default='none')
+parser.add_argument('-s', '--host', default='none', type=str)
+parser.add_argument('-p', '--port', default=14541, type=int)
 
 sp = parser.add_subparsers(dest='cmd')
 
@@ -99,6 +94,9 @@ if(args.host != 'none'):
 else:
     c_verify_server_ping()
 
+if(args.port != 14541):
+    log('trace', 'server port provided in args')
+    SERVER_PORT = args.port
 
 def hard_clone_section(cp, section_from, section_to):
     items = cp.items(section_from)
@@ -122,7 +120,7 @@ def callfrpc(args):
 
 def expose(tcps, udps):
     # Write configs
-    config = configparser.ConfigParser()
+    config = configparser.RawConfigParser()
     config.read('t_configs/template_client.ini')
 
     config.set('common', 'server_addr', SERVER_HOST)
@@ -193,10 +191,11 @@ def expose(tcps, udps):
     log('success', 'starting project_orion.')
     callfrpc(['-c', 't_configs/generated_client.ini'])
 
-def scrapeConfigs():
-    url = 'http://127.0.0.1:8087/generated_client_connect.ini'
+def scrapeConfigs(sport):
+    url = 'http://127.0.0.1:'+str(sport)+'/generated_client_connect.ini'
+    #while(True): pass
     r = requests.get(url, timeout=4)
-    if(SERVER_HOST not in str(r.content)):
+    if(str(sport) not in str(r.content)):
         log('fatal', 'error, downloaded_client_config corrupt/invalid.')
         exit(-1)
 
@@ -208,7 +207,7 @@ def scrapeConfigs():
 
 def connect(sport):
     log('out', 'initiating client handshake on port '+str(sport))
-    config = configparser.ConfigParser()
+    config = configparser.RawConfigParser()
     config.read('t_configs/template_client_connector_handshake.ini')
 
     config.set('common', 'server_addr', SERVER_HOST)
@@ -220,6 +219,7 @@ def connect(sport):
     rename_section(config, 'link_', nl)
     log('trace', config.sections())
     config.set(nl, 'server_name', nl)
+    config.set(nl, 'bind_port', sport)
 
     with open('t_configs/generated_client_connector_handshake.ini', 'w') as configfile:    # save
         config.write(configfile)
@@ -234,17 +234,18 @@ def connect(sport):
         log('trace', line)
         if('visitor added: [link_' in str(line)):
             log('trace', 'handshake pipe established, fetching configs')
-            isBuilt = scrapeConfigs()
+            try:
+                isBuilt = scrapeConfigs(sport)
+            except requests.exceptions.RequestException as e:
+                log('fatal', 'error while downloading config, please recheck the connecting port.')
             p.kill()
-    p.wait()
+    p.kill()
     if(not isBuilt or p.returncode != 1):
         log('fatal', 'problem in requesting config from host.')
         exit(-1)
 
     log('success', 'downloaded client_connect config, starting tunneling of all ports')
-
     callfrpc(['-c', 't_configs/downloaded_client_connect.ini'])
-
 
 
 if(args.cmd == 'expose'):
