@@ -7,6 +7,8 @@ import shutil
 machine = platform.uname()
 syst = machine[0].lower()
 arch = machine[4].lower()
+if(arch == 'x86-64'):
+    arch = 'amd64' # Correction for git repo
 
 ### CONFIGS
 ENDPOINT_GIT = "https://api.github.com/repos/fatedier/frp/releases"
@@ -100,12 +102,12 @@ print("Done!! Creating configurations...")
 import configparser
 config = configparser.ConfigParser()
 config['Common'] = {}
-config['Common']['dir'] = fname.rsplit('.', 1)[0]
+config['Common']['dir'] = fname.replace('.zip','').replace('.tar.gz', '')
 config['Common']['name'] = 'frpc.exe' if os.name == 'nt' else 'frpc'
-config['Jumble'] = {}
-config['Jumble']['Key1'] = 'Val1'
-config['Jumble']['Key2'] = 'Val2'
-config['Jumble']['Key3'] = 'Val3'
+# config['Jumble'] = {}
+# config['Jumble']['Key1'] = 'Val1'
+# config['Jumble']['Key2'] = 'Val2'
+# config['Jumble']['Key3'] = 'Val3'
 
 with open('config.ini', 'w') as configfile:
   config.write(configfile)
