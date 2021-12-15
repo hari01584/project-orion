@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import platform
 import argparse
@@ -53,7 +54,10 @@ def resolveHostname(host):
     command = ['ping', param, '1', host]
     proc = subprocess.check_output(command)
 
-    ipv = find_between(str(proc), 'Reply from ', '%')
+    extrac = re.search('(fe80::.*?%[a-z0-9\s]+)', str(proc), re.IGNORECASE)
+    if extrac:
+        ipv = extrac.group(1)
+
     log('trace', 'ip resolved address is %s'%(ipv,))
     log('trace', 'packet data: %s'%(proc,))
 
@@ -72,6 +76,7 @@ def c_verify_server_ping():
 
 parser = argparse.ArgumentParser(prog='cli.py')
 parser.add_argument('--debug', action='store_true')
+parser.add_argument('-s', '--host', default='none')
 
 sp = parser.add_subparsers(dest='cmd')
 
@@ -87,7 +92,13 @@ sp.add_parser('status')
 args = parser.parse_args(sys.argv[1:])
 
 IS_DEBUG = args.debug
-c_verify_server_ping()
+
+if(args.host != 'none'):
+    log('trace', 'server host provided in args, skipping checks')
+    SERVER_HOST = args.host
+else:
+    c_verify_server_ping()
+
 
 def hard_clone_section(cp, section_from, section_to):
     items = cp.items(section_from)
