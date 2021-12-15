@@ -44,10 +44,10 @@ multiplexed_url = assets_url[0][0]
 max_match = assets_url[0][1]
 
 def yes_or_no(question):
-    reply = str(input(question+' (y/n): ')).lower().strip()
-    if reply[0] == 'y':
+    reply = str(input(question+" (y/n): ")).lower().strip()
+    if reply[0] == "y":
         return True
-    if reply[0] == 'n':
+    if reply[0] == "n":
         return False
     else:
         return yes_or_no("Uhhhh... please enter ")
