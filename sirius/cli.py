@@ -49,8 +49,11 @@ def resolveHostname(host):
     proc = subprocess.check_output(command)
 
     extrac = re.search('(fe80::.*?%[a-z0-9\s]+)', str(proc), re.IGNORECASE)
+    ipv = ''
     if extrac:
         ipv = extrac.group(1)
+    else:
+        raise subprocess.CalledProcessError
 
     log('trace', 'ip resolved address is %s'%(ipv,))
     log('trace', 'packet data: %s'%(proc,))
