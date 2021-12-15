@@ -7,7 +7,7 @@ import shutil
 machine = platform.uname()
 syst = machine[0].lower()
 arch = machine[4].lower()
-if(arch == 'x86-64'):
+if(arch == 'x86_64'):
     arch = 'amd64' # Correction for git repo
 
 ### CONFIGS
