@@ -71,7 +71,7 @@ def c_verify_server_ping():
 parser = argparse.ArgumentParser(prog='cli.py')
 parser.add_argument('--debug', action='store_true')
 parser.add_argument('-s', '--host', default='none', type=str)
-parser.add_argument('-p', '--port', default=14541, type=int)
+parser.add_argument('-sp', '--secret-port', default=14541, type=int)
 
 sp = parser.add_subparsers(dest='cmd')
 
@@ -94,9 +94,9 @@ if(args.host != 'none'):
 else:
     c_verify_server_ping()
 
-if(args.port != 14541):
+if(args.secret_port != 14541):
     log('trace', 'server port provided in args')
-    SERVER_PORT = args.port
+    SERVER_PORT = args.secret_port
 
 def hard_clone_section(cp, section_from, section_to):
     items = cp.items(section_from)
