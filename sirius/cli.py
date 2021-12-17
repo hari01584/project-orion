@@ -51,6 +51,8 @@ def resolveHostname(host):
     param = '-n' if platform.system().lower()=='windows' else '-c'
     command = ['ping', param, '1', host]
     proc = subprocess.check_output(command)
+    
+    log('trace', 'packet %s'%(str(proc),))
 
     extrac = re.search('(fe80::.*?%[a-z0-9\s]+)', str(proc), re.IGNORECASE)
     ipv = ''
