@@ -104,6 +104,8 @@ config = configparser.ConfigParser()
 config['Common'] = {}
 config['Common']['dir'] = fname.replace('.zip','').replace('.tar.gz', '')
 config['Common']['name'] = 'frpc.exe' if os.name == 'nt' else 'frpc'
+config['Common']['s_name'] = 'frps.exe' if os.name == 'nt' else 'frps'
+
 # config['Jumble'] = {}
 # config['Jumble']['Key1'] = 'Val1'
 # config['Jumble']['Key2'] = 'Val2'

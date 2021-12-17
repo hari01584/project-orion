@@ -35,6 +35,7 @@ config.read('config.ini')
 try:
     FRPC_FOLDER = config['Common']['dir']
     FRPC_EXECUTABLE = config['Common']['name']
+    FRPS_EXECUTABLE = config['Common']['s_name']
 except Exception:
     log("fatal", "config.ini corrupt or not found. please run ./get.py to repair")
     exit(-1)
@@ -87,6 +88,8 @@ parser.add_argument('--debug', action='store_true')
 parser.add_argument('-s', '--host', default='none', type=str)
 parser.add_argument('-sp', '--secret-port', default=14541, type=int)
 
+parser.add_argument('--no-host', action='store_true')
+
 sp = parser.add_subparsers(dest='cmd')
 
 expose_parser = sp.add_parser('expose')
@@ -101,13 +104,25 @@ sp.add_parser('status')
 args = parser.parse_args(sys.argv[1:])
 
 IS_DEBUG = args.debug
+SERVER_NO_HOST = args.no_host
+
 if(args.host != 'none'):
     log('trace', 'server host provided in args, skipping checks')
     SERVER_HOST = args.host
+elif(SERVER_NO_HOST):
+    SERVER_NO_HOST = True
+    SERVER_HOST = '::'
+    SERVER_PORT = 14541
+    if(args.cmd == 'connect'):
+        log('out', 'no-host flag detected, please use -s or --host arg to pass host server address(pref. IPv6), You can find this address using the commands such as ipconfig(windows) or ip a (linux) on target machine')
+        exit(-1)
 else:
     c_verify_server_ping()
 
-if(args.secret_port != 14541):
+if(SERVER_NO_HOST):
+    log('trace', 'enabling self-hosting feature, this might be unstable')
+
+if(args.secret_port != 14541 and not SERVER_NO_HOST):
     log('trace', 'server port provided in args')
     SERVER_PORT = args.secret_port
 
@@ -132,6 +147,16 @@ def callfrpc(args):
     subprocess.call(callable)
 
 def expose(tcps, udps):
+    p_frps = None
+    if(SERVER_NO_HOST):
+        log('out', 'no_host enabled, starting frps server')
+        p_frps = subprocess.Popen([FRPC_FOLDER+'/'+FRPS_EXECUTABLE, '-c', 't_configs/template_server_selfhost.ini'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        for line in p_frps.stdout:
+            print(line)
+            if('frps started successfully' in str(line)):
+                log('success', 'started local frps successfully')
+                break
+
     # Write configs
     config = configparser.RawConfigParser()
     config.read('t_configs/template_client.ini')
@@ -202,7 +227,15 @@ def expose(tcps, udps):
         config.write(configfile)
 
     log('success', 'starting project_orion.')
+    if(SERVER_NO_HOST):
+        log('success', 'NOTE: NO HOST MODE IS ACTIVE, YOU HAVE TO USE --no-host FLAG WHILE CONNECTING USING SECRET PORT')
+        log('success', 'syntax(to connect): python cli.py --no-host connect '+str(port))
+    else:
+        log('success', 'syntax(to connect): python cli.py connect '+str(port))
     callfrpc(['-c', 't_configs/generated_client.ini'])
+
+    if(p_frps):
+        p_frps.kill()
 
 def scrapeConfigs(sport):
     url = 'http://127.0.0.1:'+str(sport)+'/generated_client_connect.ini'
