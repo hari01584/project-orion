@@ -49,16 +49,21 @@ def find_between(s, first, last):
 
 def resolveHostname(host):
     param = '-n' if platform.system().lower()=='windows' else '-c'
-    command = ['ping', param, '1', host]
+    command = ['ping', '-6', param, '1', host]
     proc = subprocess.check_output(command)
     
     log('trace', 'packet %s'%(str(proc),))
 
-    extrac = re.search('(fe80::.*?%[a-z0-9\s]+)', str(proc), re.IGNORECASE)
+    if(platform.system().lower()=='windows'):
+        extrac = re.search('Reply from (.*?)(: time|%)', str(proc), re.IGNORECASE)
+    else:
+        extrac = re.search('(fe80:.*?%[a-z0-9\s]+)', str(proc), re.IGNORECASE)
+
     ipv = ''
     if extrac:
         ipv = extrac.group(1)
     else:
+        log('trace', 'Exception occured, matching groups '+extrac.group(0))
         raise JustAException()
 
     log('trace', 'ip resolved address is %s'%(ipv,))
