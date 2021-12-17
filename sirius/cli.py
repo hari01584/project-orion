@@ -229,7 +229,7 @@ def expose(tcps, udps):
     log('success', 'starting project_orion.')
     if(SERVER_NO_HOST):
         log('success', 'NOTE: NO HOST MODE IS ACTIVE, YOU HAVE TO USE --no-host FLAG WHILE CONNECTING USING SECRET PORT')
-        log('success', 'syntax(to connect): python cli.py --no-host connect '+str(port))
+        log('success', 'syntax(to connect): python cli.py --no-host --host <host or ip> connect '+str(port))
     else:
         log('success', 'syntax(to connect): python cli.py connect '+str(port))
     callfrpc(['-c', 't_configs/generated_client.ini'])
@@ -294,7 +294,7 @@ def connect(sport):
                 log('fatal', 'error while downloading config, please recheck the connecting port.')
             p.kill()
     p.kill()
-    if(not isBuilt or p.returncode != 1):
+    if(not isBuilt):
         log('fatal', 'problem in requesting config from host.')
         exit(-1)
 
