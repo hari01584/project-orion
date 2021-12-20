@@ -295,7 +295,7 @@ def connect(sport):
                 log('fatal', 'error while downloading config, please recheck the connecting port.')
             p.kill()
     p.kill()
-    if(not isBuilt or p.returncode != 1):
+    if(not isBuilt):
         log('fatal', 'problem in requesting config from host.')
         exit(-1)
 
