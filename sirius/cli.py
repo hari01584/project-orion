@@ -166,7 +166,7 @@ def expose(tcps, udps):
     config.set('common', 'token', SERVER_TOKEN)
 
     port = random.randint(8000,65535)
-    # port = 47145 # TODO DEBUG
+    #port = 14259 # TODO DEBUG
     log('success', 'Your pairing port is %s'%(port,))
     nl = 'link_'+str(port)
     rename_section(config, 'link_', nl)
