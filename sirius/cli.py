@@ -282,6 +282,7 @@ def connect(sport):
     log('out', 'verifying handshake and checking configuration.')
 
     cmd = [FRPC_FOLDER+'/'+FRPC_EXECUTABLE, '-c', 't_configs/generated_client_connector_handshake.ini']
+    log('trace', 'executing => ' + cmd)
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     isBuilt = False
     for line in p.stdout:
