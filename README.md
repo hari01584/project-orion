@@ -39,7 +39,7 @@ python cli.py
 ## Used By
 
 Honestly speaking, project-orion was made to support these projects, this was not supposed to be a *standalone* kind of stuff!
-- TIntranet (for EACCESS) (link soon)
+- TIntranet (for EACCESS) - [here](https://github.com/hari01584/xTIntranet)
 - TLocalJitsi (link soon)
 
 
